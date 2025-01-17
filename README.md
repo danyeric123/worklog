@@ -9,6 +9,74 @@ This repository provides a simple CLI for recording and reviewing your daily wor
 - **Performance Reviews**: Quickly reference achievements, leading to smoother self-assessments and promotions.
 - **Better Planning**: Helps with saying “no” when overloaded, or adjusting priorities.
 
+## Best Practices for Work Logging
+
+### 1. Track Regularly
+
+- Log work daily or weekly, not retrospectively
+- Fresh details are more accurate and complete
+- Set a recurring calendar reminder
+
+### 2. Be Specific and Measurable
+
+✅ Good Example:
+
+```markdown
+- Optimized database queries
+  - Reduced average response time from 2s to 200ms
+  - Impacted 3 critical API endpoints
+  - Ticket: PROJ-123
+```
+
+❌ Poor Example:
+
+```markdown
+- Made some database improvements
+```
+
+### 3. Include "Invisible Work"
+
+- Mentoring and pair programming sessions
+- Code reviews and technical discussions
+- Helping others debug issues
+- Documentation improvements
+- Knowledge sharing
+
+### 4. Structure Your Entries
+
+- Start with the main task/project
+- Add specific sub-items for:
+  - What you did
+  - Impact/results
+  - Related tickets/PRs
+  - Collaborators involved
+
+### 5. Connect Work to Impact
+
+✅ Good Example:
+
+```markdown
+- Implemented API rate limiting
+  - Prevented abuse of free tier
+  - Reduced infrastructure costs by 15%
+  - Protected service availability during traffic spikes
+```
+
+❌ Poor Example:
+
+```markdown
+- Added rate limiting to API
+```
+
+### 6. Regular Review
+
+- Review logs monthly
+- Use for:
+  - Performance reviews
+  - Planning discussions
+  - Team retrospectives
+  - Career growth tracking
+
 ## How It Works
 
 - **Monthly Log Files**: Each month has its own Markdown file.

@@ -1,9 +1,9 @@
 categories:
-- Projects
-- Code Changes
-- Code Reviews
-- Design Documents
-- Meetings & Discussions
-- Helping Others
-- Other Tasks
+  - Projects
+  - Code Changes
+  - Code Reviews
+  - Design Documents
+  - Meetings & Discussions
+  - Helping Others
+  - Other Tasks
 git_auto_commit: false
