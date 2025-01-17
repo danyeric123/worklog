@@ -64,20 +64,11 @@ def get_log_file_path():
     return os.path.join(log_dir, f"{now.strftime('%Y_%m')}.md")
 
 
-def create_daily_entry():
+def create_daily_entry(date: datetime):
     """Create a new daily entry in the monthly log file."""
-    now = datetime.now()
-    date_header = f"## {now.strftime('%Y-%m-%d')}"
+    date_header = f"## {date.strftime('%Y-%m-%d')}"
 
-    categories = [
-        "Projects",
-        "Code Changes",
-        "Code Reviews",
-        "Design Documents",
-        "Meetings & Discussions",
-        "Helping Others",
-        "Other Tasks",
-    ]
+    categories = load_config()["categories"]
 
     click.echo("\nDaily Work Log Entry")
     click.echo("===================")
@@ -85,9 +76,8 @@ def create_daily_entry():
     entries = {}
     for category in categories:
         click.echo(f"\n{category}:")
-        click.echo(
-            "(Enter multiple items, one per line. Press Enter twice to move to next category)"
-        )
+        click.echo("(Enter items, press Enter twice to move to next category)")
+        click.echo("(After each item, you'll be prompted for sub-items)")
 
         items = []
         while True:
@@ -100,7 +90,26 @@ def create_daily_entry():
                     break
                 items.append(item)
             else:
-                items.append(item)
+                # Collect sub-items for this item
+                sub_items = []
+                click.echo("  Enter sub-items (press Enter twice to finish):")
+                while True:
+                    sub_item = click.prompt(
+                        "  >", type=str, default="", show_default=False
+                    ).strip()
+                    if not sub_item:
+                        if (
+                            sub_items and not sub_items[-1]
+                        ):  # If last sub-item was empty
+                            sub_items.pop()  # Remove the empty sub-item
+                            break
+                        if not sub_items:  # If no sub-items were entered
+                            break
+                        sub_items.append(sub_item)
+                    else:
+                        sub_items.append(sub_item)
+
+                items.append((item, sub_items))
 
         if items:
             entries[category] = items
@@ -111,7 +120,13 @@ def create_daily_entry():
         if items:
             entry_text += f"### {category}\n"
             for item in items:
-                entry_text += f"* {item}\n"
+                if isinstance(item, tuple):  # Item with sub-items
+                    main_item, sub_items = item
+                    entry_text += f"* {main_item}\n"
+                    for sub_item in sub_items:
+                        entry_text += f"    * {sub_item}\n"
+                else:  # Simple item without sub-items
+                    entry_text += f"* {item}\n"
             entry_text += "\n"
 
     return entry_text
@@ -161,7 +176,7 @@ def cli():
     default=str(date.today()),
     help="Override date (YYYY-MM-DD)",
 )
-def log(git, date):
+def log(git: bool, date: date):
     """Create a new work log entry."""
     config = load_config()
     git = git if git is not None else config["git_auto_commit"]
@@ -185,22 +200,47 @@ def log(git, date):
 @click.option(
     "--month",
     type=click.DateTime(formats=["%Y-%m"]),
+    default=None,
     help="View logs for specific month (YYYY-MM)",
 )
-def view(month):
+@click.option(
+    "--date",
+    type=click.DateTime(formats=["%Y-%m-%d"]),
+    default=lambda: datetime.now(),
+    help="View logs for specific date (YYYY-MM-DD)",
+)
+def view(month, date):
     """View work log entries."""
+
     try:
-        file_path = (
-            get_log_file_path()
-            if not month
-            else os.path.join(create_log_directory(), f"{month.strftime('%Y_%m')}.md")
-        )
+        if date:
+            # Find the monthly log file and extract the specific date's entry
+            file_path = os.path.join(
+                create_log_directory(), f"{date.strftime('%Y_%m')}.md"
+            )
+            if not os.path.exists(file_path):
+                raise WorkLogError("No logs found for specified date")
 
-        if not os.path.exists(file_path):
-            raise WorkLogError("No logs found for specified period")
+            with open(file_path) as f:
+                content = f.read()
+                date_header = f"## {date.strftime('%Y-%m-%d')}"
+                sections = content.split("\n## ")
+                for section in sections:
+                    if section.startswith(date.strftime("%Y-%m-%d")):
+                        click.echo(f"## {section}")
+                        return
+                raise WorkLogError(f"No entry found for {date.strftime('%Y-%m-%d')}")
+        else:
+            # View entire month
+            file_path = os.path.join(
+                create_log_directory(), f"{month.strftime('%Y_%m')}.md"
+            )
+            if not os.path.exists(file_path):
+                raise WorkLogError("No logs found for specified month")
 
-        with open(file_path) as f:
-            click.echo(f.read())
+            with open(file_path) as f:
+                click.echo(f.read())
+
     except WorkLogError as e:
         click.echo(f"Error: {e}", err=True)
         sys.exit(1)

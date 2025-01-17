@@ -35,9 +35,9 @@ This repository provides a simple CLI for recording and reviewing your daily wor
 
 3. **Start Logging**:
 
-    ```bash
-    uv run python ./log_script.py log
-    ```
+   ```bash
+   uv run python ./log_script.py log
+   ```
 
 ## Configuration
 
